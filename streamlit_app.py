@@ -3,12 +3,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import datetime
-import pydeck as pdk
-from geopy.geocoders import Nominatim
-import time
-from pprint import pprint
-
-app = Nominatim(user_agent="tutorial")
 
 st.set_page_config(layout="wide")
 
