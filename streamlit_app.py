@@ -54,7 +54,10 @@ intersection = list1_as_set.intersection(county_index)
 cases_reported = df['cases'][intersection].astype(str).values
 deaths_reported = df['deaths'][intersection].astype(str).values
 
-if cases_reported:
+cases_reported=cases_reported[0]
+deaths_reported=deaths_reported[0]
+
+if int(cases_reported)>0:
     col1, col2 = st.columns(2)
     col1.metric("Total Cases", int(cases_reported))
     col2.metric("Total Deaths", int(float(deaths_reported)))
