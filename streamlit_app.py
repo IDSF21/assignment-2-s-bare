@@ -57,8 +57,28 @@ deaths_reported = df['deaths'][intersection].astype(str).values
 if cases_reported:
     col1, col2 = st.columns(2)
     col1.metric("Total Cases", int(cases_reported))
-    col2.metric("Total Deaths", int(float(deaths_reported))),
+    col2.metric("Total Deaths", int(float(deaths_reported)))
 else:
     st.warning("No Cases Reported")    
 
-#### LINE PLOT
+#### BAR GRAPH
+
+st.header('Hot Spots')
+st.write("As of Date:",date_selection)
+
+options = st.multiselect(
+     'Select Cities',
+     np.sort(
+    df['county'].unique()),
+     ['Pittsburg','San Francisco','San Diego','Dallas','Miami','Los Angeles'])
+
+county_index = df.index[df['county'].isin(options)].tolist()
+
+list1_as_set = set(date_index)
+intersection = list1_as_set.intersection(county_index)
+
+county_dict=dict(zip(df['county'][intersection],df['cases'][intersection]))
+
+bar_df=pd.DataFrame.from_dict(county_dict,orient='index')
+
+st.bar_chart(bar_df,height=750)
