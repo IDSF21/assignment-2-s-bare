@@ -1,8 +1,8 @@
-from attr import s
 import streamlit as st
 import pandas as pd
 import numpy as np
 import datetime
+import pydeck as pdk
 
 st.set_page_config(layout="wide")
 
@@ -25,7 +25,7 @@ df=df.dropna(how='any')
 st.header('MAP OF CASES')
 
 date_selection1 = st.date_input("Select Date", datetime.date(
-    2021, 1, 21), min_value=datetime.date(2020, 6, 16), max_value=datetime.date(2021, 10, 11))
+    2020, 6, 30), min_value=datetime.date(2020, 6, 17), max_value=datetime.date(2021, 10, 11))
 date_index1= df.index[df['date'] == str(date_selection1)].tolist()
 
 dfscatter=df[['lat','lon']]
@@ -64,6 +64,10 @@ else:
 #### BAR GRAPH
 
 st.header('Hot Spots')
+
+date_selection = st.date_input("Choose Date for Total cases", datetime.date(
+    2020, 6, 21), min_value=datetime.date(2020, 6, 16), max_value=datetime.date(2021, 10, 11))
+date_index = df.index[df['date'] == str(date_selection)].tolist()
 st.write("As of Date:",date_selection)
 
 options = st.multiselect(
@@ -77,8 +81,76 @@ county_index = df.index[df['county'].isin(options)].tolist()
 list1_as_set = set(date_index)
 intersection = list1_as_set.intersection(county_index)
 
+st.write("TOTAL CASES")
+
+
+
 county_dict=dict(zip(df['county'][intersection],df['cases'][intersection]))
 
 bar_df=pd.DataFrame.from_dict(county_dict,orient='index')
 
-st.bar_chart(bar_df,height=750)
+st.bar_chart(bar_df,height=500)
+
+st.write("TOTAL DEATHS")
+
+options = st.multiselect(
+     'Select Cities (Deaths)',
+     np.sort(
+    df['county'].unique()),
+     ['Pittsburg','San Francisco','San Diego','Dallas','Miami','Los Angeles'])
+
+county_index = df.index[df['county'].isin(options)].tolist()
+
+list1_as_set = set(date_index)
+intersection = list1_as_set.intersection(county_index)
+
+death_dict=dict(zip(df['county'][intersection],df['deaths'][intersection]))
+
+death_pd=pd.DataFrame.from_dict(death_dict,orient='index')
+
+st.bar_chart(death_pd,height=500)
+
+
+###########  LINE
+
+st.header('CASE SPIKES')
+
+st.write("Over the entire period")
+
+state_option = st.selectbox('State', np.sort(df['state'].unique()))
+
+statewise_county = df.index[df['state'] == state_option].tolist()
+
+county_option = st.selectbox('County Wise Graph', np.sort(
+    df['county'][statewise_county].unique()))
+county_index = df.index[df['county'] == county_option].tolist()
+
+new_cases=[]
+temp=0
+for i,j in enumerate(county_index):
+    if i>0:
+        new=df['cases'][j]-df['cases'][temp]
+        if new<0:
+            new=0
+        new_cases.append(new)
+    temp=j
+
+st.line_chart(new_cases)
+new_cases=[]
+
+st.header('DEATH SPIKES')
+
+st.write("Over the entire period")
+new_deaths=[]
+temp=0
+for i,j in enumerate(county_index):
+    if i>0:
+        new=df['deaths'][j]-df['deaths'][temp]
+        if new<0:
+            new=0
+        new_deaths.append(new)
+    temp=j
+
+st.line_chart(new_deaths)
+new_deaths=[]
+
